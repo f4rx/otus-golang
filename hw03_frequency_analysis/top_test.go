@@ -80,3 +80,45 @@ func TestTop10(t *testing.T) {
 		}
 	})
 }
+
+func TestTop10_1(t *testing.T) {
+	t.Run("no words in empty string", func(t *testing.T) {
+		require.Len(t, Top10(""), 0)
+	})
+
+	str := `b b b b b b b b b b b
+	c c c c c c c c c c c
+	d d d d d d d d d d d
+	e e e e e e e e e e e
+	f f f f f f f f f f f
+	g g g g g g g g g g g
+	k k k k k k k k k k k
+	l l l l l l l l l l l
+	m m m m m m m m m m m
+	n n n n n n n n n n n
+	o o o o o o o o o o o
+	a a a a a a     a a a a a
+	z z z
+	y y
+	u u
+	z,z
+	z-z
+`
+
+	t.Run("positive test", func(t *testing.T) {
+		expected := []string{
+			"a",         // 10
+			"b",         // 10
+			"c",         // 10
+			"d",         // 10
+			"e",        // 10
+			"f",         // 10
+			"g",         // 10
+			"k",         // 10
+			"l",         // 10
+			"m",         // 10
+		}
+		require.Equal(t, expected, Top10(str))
+
+	})
+}
