@@ -1,4 +1,4 @@
-module github.com/f4rx/otus-golang/hw01_hello_otus/hw02_unpack_string
+module github.com/f4rx/otus-golang/hw02_unpack_string
 
 go 1.16
 
