@@ -22,7 +22,6 @@ func TestList(t *testing.T) {
 		l.PushBack(20)  // [10, 20]
 		l.PushBack(30)  // [10, 20, 30]
 		require.Equal(t, 3, l.Len())
-
 		middle := l.Front().Next // 20
 		l.Remove(middle)         // [10, 30]
 		require.Equal(t, 2, l.Len())
@@ -47,5 +46,119 @@ func TestList(t *testing.T) {
 			elems = append(elems, i.Value.(int))
 		}
 		require.Equal(t, []int{70, 80, 60, 40, 10, 30, 50}, elems)
+	})
+}
+
+func TestList1(t *testing.T) {
+	t.Run("complex", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10) // [10]
+		l.PushFront(20) // [10]
+		l.PushFront(30) // [10]
+		l.PushBack(100) // [10, 20]
+		l.PushBack(110) // [10, 20]
+		l.PushFront(5)  // [10]
+		// l.PushBack(30)  // [10, 20, 30]
+
+		l.MoveToFront(l.Front())
+		// l.MoveToFront(l.Back())
+
+		slog.Debug(l)
+
+		for i := l.Front(); i != nil; i = i.Next {
+			slog.Debug(i.Value.(int))
+		}
+	})
+}
+
+func TestListMoveToFrontSignleItem(t *testing.T) {
+	t.Run("complex", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+		l.MoveToFront(l.Front())
+		slog.Debug(l)
+
+		elems := make([]int, 0, l.Len())
+		for i := l.Front(); i != nil; i = i.Next {
+			elems = append(elems, i.Value.(int))
+		}
+		require.Equal(t, []int{10}, elems)
+	})
+}
+
+func TestListRemoveSingleItem(t *testing.T) {
+	t.Run("complex", func(t *testing.T) {
+		l := NewList()
+
+		i := l.PushFront(10) // [10]
+		l.Remove(i)
+
+		slog.Debug(l)
+
+		require.Equal(t, 0, l.Len())
+		require.Nil(t, l.Front())
+		require.Nil(t, l.Back())
+	})
+}
+
+func TestListRemoveFirstItem(t *testing.T) {
+	t.Run("complex", func(t *testing.T) {
+		l := NewList()
+
+		i := l.PushFront(10) // [10]
+		l.PushFront(20)      // [10]
+		l.PushFront(30)      // [10]
+
+		l.Remove(i)
+
+		slog.Debug(l)
+		require.Equal(t, 2, l.Len())
+
+		elems := make([]int, 0, l.Len())
+		for i := l.Front(); i != nil; i = i.Next {
+			elems = append(elems, i.Value.(int))
+		}
+		require.Equal(t, []int{30, 20}, elems)
+	})
+}
+
+func TestListRemoveMidleItem(t *testing.T) {
+	t.Run("complex", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+		i := l.PushFront(20)
+		l.PushFront(30)
+		l.Remove(i)
+
+		slog.Debug(l)
+		require.Equal(t, 2, l.Len())
+
+		elems := make([]int, 0, l.Len())
+		for i := l.Front(); i != nil; i = i.Next {
+			elems = append(elems, i.Value.(int))
+		}
+		require.Equal(t, []int{30, 10}, elems)
+	})
+}
+
+func TestListRemoveLastItem(t *testing.T) {
+	t.Run("complex", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)      // [10]
+		l.PushFront(20)      // [10]
+		i := l.PushFront(30) // [10]
+
+		l.Remove(i)
+
+		slog.Debug(l)
+		elems := make([]int, 0, l.Len())
+		for i := l.Front(); i != nil; i = i.Next {
+			elems = append(elems, i.Value.(int))
+		}
+		require.Equal(t, []int{20, 10}, elems)
 	})
 }
