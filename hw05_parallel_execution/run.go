@@ -30,7 +30,7 @@ func Run(tasks []Task, n, m int) error {
 				if taskPosition >= int64(len(tasks)) {
 					return
 				}
-				if *errorCount >= int64(maxErrorsCount) {
+				if atomic.LoadInt64(errorCount) >= int64(maxErrorsCount) {
 					return
 				}
 				err := tasks[taskPosition]()
