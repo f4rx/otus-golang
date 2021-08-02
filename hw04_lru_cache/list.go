@@ -3,7 +3,6 @@ package hw04lrucache
 import (
 	"fmt"
 	"strings"
-
 )
 
 type List interface {
