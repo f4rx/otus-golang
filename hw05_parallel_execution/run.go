@@ -14,25 +14,47 @@ type Task func() error
 func Run(tasks []Task, n, m int) error {
 	// Place your code here.
 
-	maxGoroutines := make(chan struct{}, n)
+	// maxGoroutines := make(chan struct{}, n)
 
 	var wg sync.WaitGroup
 	var errorCount int64 = 0
+	var lastTaskPosition int64 = -1
 
-	for _, task := range tasks {
+	for i := 0; i <= n; i++ {
 		wg.Add(1)
-		maxGoroutines <- struct{}{}
-		if int64(m) > atomic.LoadInt64(&errorCount) {
-			go func(task Task, errorCount *int64, m int) {
-				defer wg.Done()
-				err := task()
+		go func(tasks []Task, errorCount, lastTaskPosition *int64, maxErrorsCount, runnerID int) {
+			defer wg.Done()
+			for {
+				taskPosition := atomic.AddInt64(lastTaskPosition, 1)
+				// fmt.Printf("Runner %d, task %d\n", runnerID, taskPosition)
+				if taskPosition >= int64(len(tasks)) {
+					return
+				}
+				if *errorCount >= int64(maxErrorsCount) {
+					return
+				}
+				err := tasks[taskPosition]()
 				if err != nil {
 					atomic.AddInt64(errorCount, 1)
 				}
-			}(task, &errorCount, m)
-		}
-		<-maxGoroutines
+			}
+		}(tasks, &errorCount, &lastTaskPosition, m, i)
 	}
+
+	// for _, task := range tasks {
+	// 	wg.Add(1)
+	// 	go func(task Task, errorCount *int64, m int) {
+	// 		defer wg.Done()
+	// 		maxGoroutines <- struct{}{}
+	// 		if int64(m) > atomic.LoadInt64(errorCount) {
+	// 			err := task()
+	// 			if err != nil {
+	// 				atomic.AddInt64(errorCount, 1)
+	// 			}
+	// 		}
+	// 		<-maxGoroutines
+	// 	}(task, &errorCount, m)
+	// }
 
 	wg.Wait()
 	if errorCount >= int64(m) {
