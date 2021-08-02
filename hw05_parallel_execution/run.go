@@ -21,17 +21,17 @@ func Run(tasks []Task, n, m int) error {
 
 	for _, task := range tasks {
 		wg.Add(1)
-		go func(task Task, errorCount *int64, m int) {
-			defer wg.Done()
-			maxGoroutines <- struct{}{}
-			if int64(m) > atomic.LoadInt64(errorCount) {
+		maxGoroutines <- struct{}{}
+		if int64(m) > atomic.LoadInt64(&errorCount) {
+			go func(task Task, errorCount *int64, m int) {
+				defer wg.Done()
 				err := task()
 				if err != nil {
 					atomic.AddInt64(errorCount, 1)
 				}
-			}
-			<-maxGoroutines
-		}(task, &errorCount, m)
+			}(task, &errorCount, m)
+		}
+		<-maxGoroutines
 	}
 
 	wg.Wait()
