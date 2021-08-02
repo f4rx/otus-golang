@@ -20,8 +20,8 @@ func Run(tasks []Task, n, m int) error {
 	var errorCount int64 = 0
 	var lastTaskPosition int64 = -1
 
-	for i := 0; i <= n; i++ {
-		wg.Add(1)
+	wg.Add(n)
+	for i := 0; i < n; i++ {
 		go func(tasks []Task, errorCount, lastTaskPosition *int64, maxErrorsCount, runnerID int) {
 			defer wg.Done()
 			for {
