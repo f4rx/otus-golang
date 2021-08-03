@@ -37,6 +37,35 @@ func TestPipeline(t *testing.T) {
 		g("Stringifier", func(v interface{}) interface{} { return strconv.Itoa(v.(int)) }),
 	}
 
+	emptyStages := []Stage{}
+
+
+	t.Run("empty stages", func(t *testing.T) {
+		in := make(Bi)
+		data := []int{1, 2, 3, 4, 5}
+
+		go func() {
+			for _, v := range data {
+				in <- v
+			}
+			close(in)
+		}()
+
+
+		result := make([]interface{}, 0, 10)
+		for s := range ExecutePipeline(in, nil, emptyStages...) {
+			result = append(result, s)
+		}
+		// fmt.Println(result)
+		// fmt.Println(len(result))
+		expected := make([]interface{}, 0, 10)
+		for _, v := range data {
+			expected = append(expected, v)
+		}
+
+		require.Equal(t, expected, result)
+	})
+
 	t.Run("simple case", func(t *testing.T) {
 		in := make(Bi)
 		data := []int{1, 2, 3, 4, 5}

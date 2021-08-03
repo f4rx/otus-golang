@@ -20,14 +20,18 @@ func execStages(data interface{}, stages ...Stage) Out {
 
 	go func() {
 		fIn := make(Bi)
-		fOut := stages[0](fIn)
-		for i := 1; i < len(stages); i++ {
-			fOut = stages[i](fOut)
+		if len(stages) > 0 {
+			fOut := stages[0](fIn)
+			for i := 1; i < len(stages); i++ {
+				fOut = stages[i](fOut)
+			}
+			fIn <- data
+			out <- <-fOut
+		} else {
+			out <- data
 		}
 
-		fIn <- data
 
-		out <- <-fOut
 		close(out)
 	}()
 	return out
