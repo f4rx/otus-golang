@@ -1,5 +1,5 @@
-github.com/golang/example v0.0.0-20210407023211-09c3a5e06b5d h1:g799yZ6vuHvZvdAMnCewlAJaVMSm/XjQk7a7ZN6Wl0Q=
-github.com/golang/example v0.0.0-20210407023211-09c3a5e06b5d/go.mod h1:+yakPl5KR9J+ysfUNADYwEU5qeqjUO473wDktD4xMYw=
+github.com/golang/example v0.0.0-20210811190340-787a929d5a0d h1:qEWJsc3MCXixUNgwJDJuFBi/MbdixjKc19SET7nv42c=
+github.com/golang/example v0.0.0-20210811190340-787a929d5a0d/go.mod h1:+yakPl5KR9J+ysfUNADYwEU5qeqjUO473wDktD4xMYw=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
