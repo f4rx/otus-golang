@@ -1,8 +1,6 @@
 package hw02unpackstring
 
 import (
-
-	// "fmt".
 	"strconv"
 	"strings"
 	"unicode"
@@ -43,11 +41,6 @@ func Unpack(str string) (string, error) {
 				i++ // Если справа число, то перескакиваем через него.
 			}
 		}
-		// } else {
-		// 	if unicode.IsDigit(r) {
-		// 		return "", ErrInvalidString
-		// 	}
-		// }
 		outStr.WriteString(outMessage)
 	}
 
