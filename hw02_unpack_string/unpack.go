@@ -1,24 +1,12 @@
 package hw02unpackstring
 
 import (
-	"errors"
-	// "fmt"
+
+	// "fmt".
 	"strconv"
 	"strings"
 	"unicode"
-
-	logger "github.com/f4rx/logger-zap-wrapper"
-	"go.uber.org/zap"
 )
-
-var slog *zap.SugaredLogger //nolint:gochecknoglobals
-
-var ErrInvalidString = errors.New("invalid string")
-
-func init() {
-	slog = logger.NewSugaredLogger()
-	slog.Sync() //nolint:errcheck
-}
 
 func Unpack(str string) (string, error) {
 	runes := []rune(str)
@@ -26,37 +14,41 @@ func Unpack(str string) (string, error) {
 		return "", nil
 	}
 
-	var outStr strings.Builder
-
-	leftRune := runes[0]
-	if unicode.IsDigit(leftRune) {
+	if unicode.IsDigit(runes[0]) {
 		return "", ErrInvalidString
 	}
+
+	var outStr strings.Builder
 	runesLen := len(runes)
+
 	for i := 0; i < runesLen; i++ {
 		r := runes[i]
-		slog.Debug(i, " ", string(r))
+		outMessage := string(r)
+		slog.Debug(i, " ", outMessage)
+
+		if unicode.IsDigit(r) {
+			// slog.Debug(r, rightRune)
+			return "", ErrInvalidString
+		}
+
 		if i < runesLen-1 {
 			rightRune := runes[i+1]
-			if unicode.IsDigit(r) {
-				slog.Debug(r, rightRune)
-				return "", ErrInvalidString
-			}
+
 			if unicode.IsDigit(rightRune) {
-				c, err := strconv.Atoi(string(rightRune))
+				repeatCount, err := strconv.Atoi(string(rightRune))
 				if err != nil {
 					slog.Panic("что-то неправильно написано....")
 				}
-				outStr.WriteString(strings.Repeat(string(r), c))
-				i++
-			} else {
-				outStr.WriteString(string(r))
-			}
-		} else {
-			if !unicode.IsDigit(r) {
-				outStr.WriteString(string(r))
+				outMessage = strings.Repeat(outMessage, repeatCount)
+				i++ // Если справа число, то перескакиваем через него.
 			}
 		}
+		// } else {
+		// 	if unicode.IsDigit(r) {
+		// 		return "", ErrInvalidString
+		// 	}
+		// }
+		outStr.WriteString(outMessage)
 	}
 
 	return outStr.String(), nil
