@@ -1,27 +1,21 @@
 package hw03frequencyanalysis
 
 import (
-	"strings"
+	"regexp"
 	"sort"
+	"strings"
 
 	logger "github.com/f4rx/logger-zap-wrapper"
 	"go.uber.org/zap"
 )
 
+var validWord = regexp.MustCompile(`^[^-][\p{L}-]*`)
+
 var slog *zap.SugaredLogger //nolint:gochecknoglobals
 
 func init() {
 	slog = logger.NewSugaredLogger()
-	slog.Sync() //nolint:errcheck
 }
-
-/*
-regexp.MustCompile
-strings.Split
-strings.Fields
-sort.Slice
-*/
-
 
 func Top10(str string) []string {
 	// slog.Debug(str)
@@ -31,15 +25,19 @@ func Top10(str string) []string {
 	w := sortWordKyes(m)
 	if len(w) > 10 {
 		return w[:10]
-	} else {
-		return w
+	} else { //nolint:golint
+		return w // мне нравится более явное обозначание в таких конструкциях
 	}
 }
 
 func generateMap(words []string) map[string]int64 {
 	wordsCounted := make(map[string]int64)
 	for _, word := range words {
-		wordsCounted[word]++
+		lowWord := strings.ToLower(word)
+		strippedWord := validWord.FindString(lowWord)
+		if len(strippedWord) > 0 {
+			wordsCounted[strippedWord]++
+		}
 	}
 	slog.Debug(wordsCounted)
 	return wordsCounted
