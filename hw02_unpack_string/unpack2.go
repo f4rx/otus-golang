@@ -1,8 +1,6 @@
 package hw02unpackstring
 
 import (
-
-	// "fmt".
 	"strconv"
 	"strings"
 	"unicode"
