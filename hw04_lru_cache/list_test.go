@@ -162,3 +162,21 @@ func TestListRemoveLastItem(t *testing.T) {
 		require.Equal(t, []int{20, 10}, elems)
 	})
 }
+
+func TestListPushBackInEmpty(t *testing.T) {
+	t.Run("complex", func(t *testing.T) {
+		l := NewList()
+
+		l.PushBack(10) // [10]
+		l.PushFront(5) // [5 ,10 ]
+		l.PushBack(20) // [5 ,10, 20 ]
+		l.PushFront(1) // [1, 5 ,10, 20 ]
+
+		slog.Debug(l)
+		elems := make([]int, 0, l.Len())
+		for i := l.Front(); i != nil; i = i.Next {
+			elems = append(elems, i.Value.(int))
+		}
+		require.Equal(t, []int{1, 5, 10, 20}, elems)
+	})
+}

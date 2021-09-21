@@ -16,6 +16,12 @@ type Cache interface {
 	Clear()
 }
 
+type cacheItem struct {
+	// key   string
+	key   Key
+	value interface{}
+}
+
 type lruCache struct {
 	capacity int
 	queue    List
@@ -81,12 +87,6 @@ func (l *lruCache) String() string {
 	}
 
 	return out.String()
-}
-
-type cacheItem struct {
-	// key   string
-	key   Key
-	value interface{}
 }
 
 func NewCache(capacity int) Cache {

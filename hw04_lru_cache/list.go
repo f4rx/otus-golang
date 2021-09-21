@@ -29,7 +29,7 @@ type list struct {
 	// Place your code here.
 }
 
-func (l list) Len() int {
+func (l *list) Len() int {
 	return l.size
 }
 
@@ -117,6 +117,6 @@ func (l *list) String() string {
 func NewList() List {
 	l := new(list)
 	l.back = nil
-	l.back = nil
+	l.front = nil
 	return l
 }

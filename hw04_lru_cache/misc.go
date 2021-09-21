@@ -9,5 +9,4 @@ var slog *zap.SugaredLogger //nolint:gochecknoglobals
 
 func init() {
 	slog = logger.NewSugaredLogger()
-	slog.Sync() //nolint:errcheck
 }

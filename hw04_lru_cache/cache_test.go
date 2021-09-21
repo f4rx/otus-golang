@@ -155,3 +155,24 @@ func TestCacheComplexOverflow(t *testing.T) {
 		require.Equal(t, []int{500, 400, 300}, elems)
 	})
 }
+
+func TestClear(t *testing.T) {
+	t.Run("empty cache", func(t *testing.T) {
+		c := NewCache(2)
+
+		c.Set("a", 100)
+		c.Set("b", 200)
+		c.Clear()
+		slog.Debug(c)
+
+		lruC := c.(*lruCache)
+
+		require.Equal(t, 0, lruC.queue.Len())
+
+		// Проверяем что после очистки всё дальше работает
+		c.Set("a", 100)
+		c.Set("b", 200)
+		slog.Debug(lruC)
+		require.Equal(t, 2, lruC.queue.Len())
+	})
+}
