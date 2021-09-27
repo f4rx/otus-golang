@@ -185,82 +185,116 @@ func TestListRemoveSingleItem(t *testing.T) {
 func TestList2(t *testing.T) {
 	lpb := List.PushBack
 	lpf := List.PushFront
-	lr := List.Remove
+	// lr := List.Remove
 
-	testActionsAndResult1 := func(l List) (string, []func(), []int) {
-		name := "push back and front"
-		funcList := []func(){
-			func() { lpb(l, 10) },
-			func() { lpf(l, 5) },
-			func() { lpb(l, 20) },
-			func() { lpf(l, 1) },
-		}
-		result := []int{1, 5, 10, 20}
-		return name, funcList, result
+	type action struct {
+		name   string
+		run    func(l List)
+		result []int
 	}
 
-	testActionsAndResult2 := func(l List) (string, []func(), []int) {
-		name := "remove last item"
-		funcList := []func(){
-			func() { lpf(l, 10) },
-			func() { lpf(l, 20) },
-			func() {
-				i := lpf(l, 20)
-				lr(l, i)
-			},
-		}
-		result := []int{20, 10}
-		return name, funcList, result
+	a1 := action{
+		name: "push back and front",
+		run: func(l List) {
+			lpb(l, 10)
+			lpf(l, 5)
+			lpb(l, 20)
+			lpf(l, 1)
+		},
+		result: []int{1, 5, 10, 20},
 	}
 
-	testActionsAndResult3 := func(l List) (string, []func(), []int) {
-		name := "remove midle item"
-		funcList := []func(){
-			func() { lpf(l, 10) },
-			func() {
-				i := lpf(l, 20)
-				lpf(l, 30)
-				lr(l, i)
-			},
-		}
-		result := []int{30, 10}
-		return name, funcList, result
+	actions := []action{
+		a1,
 	}
 
-	testActionsAndResult4 := func(l List) (string, []func(), []int) {
-		name := "remove first item"
-		funcList := []func(){
-			func() { i := lpf(l, 10)
-					lpf(l, 20)
-					lpf(l, 30)
-					lr(l, i)
-			},
-
-		}
-		result := []int{30, 20}
-		return name, funcList, result
-	}
-
-	testActionsAndResultList := []func(l List) (string, []func(), []int){
-		testActionsAndResult1,
-		testActionsAndResult2,
-		testActionsAndResult3,
-		testActionsAndResult4,
-	}
-
-	for i, testActionsAndResult := range testActionsAndResultList {
+	for i, a := range actions {
 		l := NewList()
-		name, actions, result := testActionsAndResult(l)
-		t.Run(fmt.Sprintf("test_%d, name:%s", i, name), func(t *testing.T) {
-			for _, action := range actions {
-				action()
-			}
+		t.Run(fmt.Sprintf("test_%d, name:%s", i, a.name), func(t *testing.T) {
+			a.run(l)
 			slog.Debug(l)
 			elems := make([]int, 0, l.Len())
 			for i := l.Front(); i != nil; i = i.Next {
 				elems = append(elems, i.Value.(int))
 			}
-			require.Equal(t, result, elems)
+			require.Equal(t, a.result, elems)
 		})
 	}
+
+	// testActionsAndResult1 := func(l List) (string, []func(), []int) {
+	// 	name := "push back and front"
+	// 	funcList := []func(){
+	// 		func() { lpb(l, 10) },
+	// 		func() { lpf(l, 5) },
+	// 		func() { lpb(l, 20) },
+	// 		func() { lpf(l, 1) },
+	// 	}
+	// 	result := []int{1, 5, 10, 20}
+	// 	return name, funcList, result
+	// }
+
+	// testActionsAndResult2 := func(l List) (string, []func(), []int) {
+	// 	name := "remove last item"
+	// 	funcList := []func(){
+	// 		func() { lpf(l, 10) },
+	// 		func() { lpf(l, 20) },
+	// 		func() {
+	// 			i := lpf(l, 20)
+	// 			lr(l, i)
+	// 		},
+	// 	}
+	// 	result := []int{20, 10}
+	// 	return name, funcList, result
+	// }
+
+	// testActionsAndResult3 := func(l List) (string, []func(), []int) {
+	// 	name := "remove midle item"
+	// 	funcList := []func(){
+	// 		func() { lpf(l, 10) },
+	// 		func() {
+	// 			i := lpf(l, 20)
+	// 			lpf(l, 30)
+	// 			lr(l, i)
+	// 		},
+	// 	}
+	// 	result := []int{30, 10}
+	// 	return name, funcList, result
+	// }
+
+	// testActionsAndResult4 := func(l List) (string, []func(), []int) {
+	// 	name := "remove first item"
+	// 	funcList := []func(){
+	// 		func() {
+	// 			i := lpf(l, 10)
+	// 			lpf(l, 20)
+	// 			lpf(l, 30)
+	// 			lr(l, i)
+	// 		},
+	// 	}
+	// 	result := []int{30, 20}
+	// 	return name, funcList, result
+	// }
+
+	// testActionsAndResultList := []func(l List) (string, []func(), []int){
+	// 	testActionsAndResult1,
+	// 	testActionsAndResult2,
+	// 	testActionsAndResult3,
+	// 	testActionsAndResult4,
+	// }
+
+	// for i, testActionsAndResult := range testActionsAndResultList {
+	// 	l := NewList()
+	// 	name, actions, result := testActionsAndResult(l)
+	// 	t.Run(fmt.Sprintf("test_%d, name:%s", i, name), func(t *testing.T) {
+	// 		for _, action := range actions {
+	// 			action()
+	// 		}
+	// 		slog.Debug(l)
+	// 		elems := make([]int, 0, l.Len())
+	// 		for i := l.Front(); i != nil; i = i.Next {
+	// 			elems = append(elems, i.Value.(int))
+	// 		}
+	// 		require.Equal(t, result, elems)
+	// 	})
+	// }
 }
