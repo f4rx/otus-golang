@@ -22,11 +22,9 @@ type ListItem struct {
 }
 
 type list struct {
-	// List // Remove me after realization.
 	size  int
 	front *ListItem
 	back  *ListItem
-	// Place your code here.
 }
 
 func (l *list) Len() int {
@@ -53,7 +51,6 @@ func (l *list) PushFront(v interface{}) *ListItem {
 		l.back = item
 	}
 	l.size++
-	// l.PrintList()
 	return item
 }
 
@@ -70,7 +67,6 @@ func (l *list) PushBack(v interface{}) *ListItem {
 		l.front = item
 	}
 	l.size++
-	// l.PrintList()
 	return item
 }
 
@@ -94,23 +90,37 @@ func (l *list) Remove(i *ListItem) {
 	}
 
 	l.size--
-	// l.PrintList()
 }
 
 func (l *list) MoveToFront(i *ListItem) {
 	value := i.Value
 	l.Remove(i)
 	l.PushFront(value)
-	// l.PrintList()
 }
 
 func (l *list) String() string {
+	var out strings.Builder
+	out.WriteString("{")
+
+	for item := l.Front(); item != nil; item = item.Next {
+		out.WriteString(fmt.Sprintf("%v ", item.Value))
+	}
+	out.WriteString("}")
+	return out.String()
+}
+
+/*
+Ранее этот функционал был просто в String() и мне его хватало.
+Решил разбить на два для демонстрации.
+*/
+func (l *list) GoString() string {
 	var out strings.Builder
 	out.WriteString(fmt.Sprintf("List: size: %d", l.Len()))
 
 	for item := l.Front(); item != nil; item = item.Next {
 		out.WriteString(fmt.Sprintf("\n%p: , %v", item, item))
 	}
+	out.WriteString("\n")
 	return out.String()
 }
 

@@ -50,7 +50,9 @@ func TestList(t *testing.T) {
 	})
 }
 
-func TestList2(t *testing.T) {
+func TestListManyCases(t *testing.T) {
+	// на самом деле это не нужно, осталось от эксперементов
+	// оставлю тут на память
 	lpb := List.PushBack
 	lpf := List.PushFront
 	lr := List.Remove
@@ -135,4 +137,39 @@ func TestList2(t *testing.T) {
 			require.Equal(t, a.result, elems)
 		})
 	}
+}
+
+func TestString(t *testing.T) {
+	t.Run("String", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+		l.PushFront(20)
+		l.PushFront(30)
+		l.PushBack(100)
+		l.PushBack(110)
+		l.PushFront(5)
+		l.MoveToFront(l.Front())
+
+		slog.Debug(l)
+		str := fmt.Sprintf("%v", l)
+		require.Equal(t, "{5 30 20 10 100 110 }", str)
+	})
+}
+
+func TestDummyGoString(t *testing.T) {
+	t.Run("String", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+		l.PushFront(20)
+		l.PushFront(30)
+		l.PushBack(100)
+		l.PushBack(110)
+		l.PushFront(5)
+		l.MoveToFront(l.Front())
+
+		str := fmt.Sprintf("%#v", l)
+		slog.Debug(str)
+	})
 }

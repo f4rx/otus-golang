@@ -79,7 +79,7 @@ func TestCacheMultithreading(t *testing.T) {
 	wg.Wait()
 }
 
-func TestCache1(t *testing.T) {
+func TestCacheDummy(t *testing.T) {
 	t.Run("empty cache", func(t *testing.T) {
 		c := NewCache(2)
 
