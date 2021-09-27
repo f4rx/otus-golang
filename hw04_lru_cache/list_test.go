@@ -185,7 +185,7 @@ func TestListRemoveSingleItem(t *testing.T) {
 func TestList2(t *testing.T) {
 	lpb := List.PushBack
 	lpf := List.PushFront
-	// lr := List.Remove
+	lr := List.Remove
 
 	type action struct {
 		name   string
@@ -193,19 +193,27 @@ func TestList2(t *testing.T) {
 		result []int
 	}
 
-	a1 := action{
-		name: "push back and front",
-		run: func(l List) {
-			lpb(l, 10)
-			lpf(l, 5)
-			lpb(l, 20)
-			lpf(l, 1)
-		},
-		result: []int{1, 5, 10, 20},
-	}
-
 	actions := []action{
-		a1,
+		action{
+			name: "push back and front",
+			run: func(l List) {
+				lpb(l, 10)
+				lpf(l, 5)
+				lpb(l, 20)
+				lpf(l, 1)
+			},
+			result: []int{1, 5, 10, 20},
+		},
+		action{
+			name: "remove last item",
+			run: func(l List) {
+				lpf(l, 10)
+				lpf(l, 20)
+				i := lpf(l, 20)
+				lr(l, i)
+			},
+			result: []int{20, 10},
+		},
 	}
 
 	for i, a := range actions {
