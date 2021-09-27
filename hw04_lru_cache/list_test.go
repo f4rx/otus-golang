@@ -1,6 +1,7 @@
 package hw04lrucache
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -103,80 +104,163 @@ func TestListRemoveSingleItem(t *testing.T) {
 	})
 }
 
-func TestListRemoveFirstItem(t *testing.T) {
-	t.Run("complex", func(t *testing.T) {
-		l := NewList()
+// func TestListRemoveFirstItem(t *testing.T) {
+// 	t.Run("complex", func(t *testing.T) {
+// 		l := NewList()
 
-		i := l.PushFront(10) // [10]
-		l.PushFront(20)      // [10]
-		l.PushFront(30)      // [10]
+// 		i := l.PushFront(10) // [10]
+// 		l.PushFront(20)      // [10]
+// 		l.PushFront(30)      // [10]
 
-		l.Remove(i)
+// 		l.Remove(i)
 
-		slog.Debug(l)
-		require.Equal(t, 2, l.Len())
+// 		slog.Debug(l)
+// 		require.Equal(t, 2, l.Len())
 
-		elems := make([]int, 0, l.Len())
-		for i := l.Front(); i != nil; i = i.Next {
-			elems = append(elems, i.Value.(int))
+// 		elems := make([]int, 0, l.Len())
+// 		for i := l.Front(); i != nil; i = i.Next {
+// 			elems = append(elems, i.Value.(int))
+// 		}
+// 		require.Equal(t, []int{30, 20}, elems)
+// 	})
+// }
+
+// func TestListRemoveMidleItem(t *testing.T) {
+// 	t.Run("complex", func(t *testing.T) {
+// 		l := NewList()
+
+// 		l.PushFront(10)
+// 		i := l.PushFront(20)
+// 		l.PushFront(30)
+// 		l.Remove(i)
+
+// 		slog.Debug(l)
+// 		require.Equal(t, 2, l.Len())
+
+// 		elems := make([]int, 0, l.Len())
+// 		for i := l.Front(); i != nil; i = i.Next {
+// 			elems = append(elems, i.Value.(int))
+// 		}
+// 		require.Equal(t, []int{30, 10}, elems)
+// 	})
+// }
+
+// func TestListRemoveLastItem(t *testing.T) {
+// 	t.Run("complex", func(t *testing.T) {
+// 		l := NewList()
+
+// 		l.PushFront(10)      // [10]
+// 		l.PushFront(20)      // [10]
+// 		i := l.PushFront(30) // [10]
+
+// 		l.Remove(i)
+
+// 		slog.Debug(l)
+// 		elems := make([]int, 0, l.Len())
+// 		for i := l.Front(); i != nil; i = i.Next {
+// 			elems = append(elems, i.Value.(int))
+// 		}
+// 		require.Equal(t, []int{20, 10}, elems)
+// 	})
+// }
+
+// func TestListPushBackInEmpty(t *testing.T) {
+// 	t.Run("complex", func(t *testing.T) {
+// 		l := NewList()
+
+// 		l.PushBack(10) // [10]
+// 		l.PushFront(5) // [5 ,10 ]
+// 		l.PushBack(20) // [5 ,10, 20 ]
+// 		l.PushFront(1) // [1, 5 ,10, 20 ]
+
+// 		slog.Debug(l)
+// 		elems := make([]int, 0, l.Len())
+// 		for i := l.Front(); i != nil; i = i.Next {
+// 			elems = append(elems, i.Value.(int))
+// 		}
+// 		require.Equal(t, []int{1, 5, 10, 20}, elems)
+// 	})
+// }
+
+func TestList2(t *testing.T) {
+	lpb := List.PushBack
+	lpf := List.PushFront
+	lr := List.Remove
+
+	testActionsAndResult1 := func(l List) (string, []func(), []int) {
+		name := "push back and front"
+		funcList := []func(){
+			func() { lpb(l, 10) },
+			func() { lpf(l, 5) },
+			func() { lpb(l, 20) },
+			func() { lpf(l, 1) },
 		}
-		require.Equal(t, []int{30, 20}, elems)
-	})
-}
+		result := []int{1, 5, 10, 20}
+		return name, funcList, result
+	}
 
-func TestListRemoveMidleItem(t *testing.T) {
-	t.Run("complex", func(t *testing.T) {
-		l := NewList()
-
-		l.PushFront(10)
-		i := l.PushFront(20)
-		l.PushFront(30)
-		l.Remove(i)
-
-		slog.Debug(l)
-		require.Equal(t, 2, l.Len())
-
-		elems := make([]int, 0, l.Len())
-		for i := l.Front(); i != nil; i = i.Next {
-			elems = append(elems, i.Value.(int))
+	testActionsAndResult2 := func(l List) (string, []func(), []int) {
+		name := "remove last item"
+		funcList := []func(){
+			func() { lpf(l, 10) },
+			func() { lpf(l, 20) },
+			func() {
+				i := lpf(l, 20)
+				lr(l, i)
+			},
 		}
-		require.Equal(t, []int{30, 10}, elems)
-	})
-}
+		result := []int{20, 10}
+		return name, funcList, result
+	}
 
-func TestListRemoveLastItem(t *testing.T) {
-	t.Run("complex", func(t *testing.T) {
-		l := NewList()
-
-		l.PushFront(10)      // [10]
-		l.PushFront(20)      // [10]
-		i := l.PushFront(30) // [10]
-
-		l.Remove(i)
-
-		slog.Debug(l)
-		elems := make([]int, 0, l.Len())
-		for i := l.Front(); i != nil; i = i.Next {
-			elems = append(elems, i.Value.(int))
+	testActionsAndResult3 := func(l List) (string, []func(), []int) {
+		name := "remove midle item"
+		funcList := []func(){
+			func() { lpf(l, 10) },
+			func() {
+				i := lpf(l, 20)
+				lpf(l, 30)
+				lr(l, i)
+			},
 		}
-		require.Equal(t, []int{20, 10}, elems)
-	})
-}
+		result := []int{30, 10}
+		return name, funcList, result
+	}
 
-func TestListPushBackInEmpty(t *testing.T) {
-	t.Run("complex", func(t *testing.T) {
-		l := NewList()
+	testActionsAndResult4 := func(l List) (string, []func(), []int) {
+		name := "remove first item"
+		funcList := []func(){
+			func() { i := lpf(l, 10)
+					lpf(l, 20)
+					lpf(l, 30)
+					lr(l, i)
+			},
 
-		l.PushBack(10) // [10]
-		l.PushFront(5) // [5 ,10 ]
-		l.PushBack(20) // [5 ,10, 20 ]
-		l.PushFront(1) // [1, 5 ,10, 20 ]
-
-		slog.Debug(l)
-		elems := make([]int, 0, l.Len())
-		for i := l.Front(); i != nil; i = i.Next {
-			elems = append(elems, i.Value.(int))
 		}
-		require.Equal(t, []int{1, 5, 10, 20}, elems)
-	})
+		result := []int{30, 20}
+		return name, funcList, result
+	}
+
+	testActionsAndResultList := []func(l List) (string, []func(), []int){
+		testActionsAndResult1,
+		testActionsAndResult2,
+		testActionsAndResult3,
+		testActionsAndResult4,
+	}
+
+	for i, testActionsAndResult := range testActionsAndResultList {
+		l := NewList()
+		name, actions, result := testActionsAndResult(l)
+		t.Run(fmt.Sprintf("test_%d, name:%s", i, name), func(t *testing.T) {
+			for _, action := range actions {
+				action()
+			}
+			slog.Debug(l)
+			elems := make([]int, 0, l.Len())
+			for i := l.Front(); i != nil; i = i.Next {
+				elems = append(elems, i.Value.(int))
+			}
+			require.Equal(t, result, elems)
+		})
+	}
 }
