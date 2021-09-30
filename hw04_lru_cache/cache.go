@@ -1,5 +1,11 @@
 package hw04lrucache
 
+import (
+	"fmt"
+	"strings"
+	"sync"
+)
+
 type Key string
 
 type Cache interface {
@@ -8,17 +14,78 @@ type Cache interface {
 	Clear()
 }
 
-type lruCache struct {
-	Cache // Remove me after realization.
+type cacheItem struct {
+	// key   string
+	key   Key
+	value interface{}
+}
 
+type lruCache struct {
 	capacity int
 	queue    List
 	items    map[Key]*ListItem
+	mutex    *sync.Mutex
 }
 
-type cacheItem struct {
-	key   string
-	value interface{}
+func (l *lruCache) Set(key Key, value interface{}) bool {
+	l.mutex.Lock()
+	defer l.mutex.Unlock()
+
+	// slog.Debug("Set: ", key, " : ", value)
+	if item, ok := l.items[key]; ok {
+		// slog.Debug("Update cache ", item)
+		currentCacheItem := item.Value.(cacheItem)
+		currentCacheItem.value = value
+		item.Value = currentCacheItem
+		l.queue.MoveToFront(item)
+		// slog.Debug(l.queue.Len())
+		// slog.Debug(l.queue)
+		return true
+	} else { //nolint:golint
+		if l.queue.Len() == l.capacity {
+			item = l.queue.Back()
+			backCacheItem := item.Value.(cacheItem)
+			l.queue.Remove(item)
+			delete(l.items, backCacheItem.key)
+		}
+		newCacheItem := cacheItem{key, value}
+		item = l.queue.PushFront(newCacheItem)
+		l.items[key] = item
+		// slog.Debug(l.queue.Len())
+		// slog.Debug(l.queue)
+	}
+	return false
+}
+
+func (l *lruCache) Get(key Key) (interface{}, bool) {
+	l.mutex.Lock()
+	defer l.mutex.Unlock()
+	if item, ok := l.items[key]; ok {
+		currentCacheItem := item.Value.(cacheItem)
+		l.queue.MoveToFront(item)
+		l.items[key] = l.queue.Front()
+		return currentCacheItem.value, true
+	}
+	return nil, false
+}
+
+func (l *lruCache) Clear() {
+	l.mutex.Lock()
+	defer l.mutex.Unlock()
+	l.queue = NewList()
+	l.items = make(map[Key]*ListItem, l.capacity)
+}
+
+func (l *lruCache) String() string {
+	var out strings.Builder
+	out.WriteString(fmt.Sprintf("%s\n", l.queue))
+	// fmt.Println(l.queue)
+	out.WriteString("Keys: ")
+	for k := range l.items {
+		out.WriteString(fmt.Sprintf("%s ", k))
+	}
+
+	return out.String()
 }
 
 func NewCache(capacity int) Cache {
@@ -26,5 +93,6 @@ func NewCache(capacity int) Cache {
 		capacity: capacity,
 		queue:    NewList(),
 		items:    make(map[Key]*ListItem, capacity),
+		mutex:    &sync.Mutex{},
 	}
 }

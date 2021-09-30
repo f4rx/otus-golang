@@ -2,6 +2,7 @@ package hw04lrucache
 
 import (
 	"math/rand"
+	"sort"
 	"strconv"
 	"sync"
 	"testing"
@@ -55,7 +56,7 @@ func TestCache(t *testing.T) {
 }
 
 func TestCacheMultithreading(t *testing.T) {
-	t.Skip() // Remove me if task with asterisk completed.
+	// t.Skip() // Remove me if task with asterisk completed.
 
 	c := NewCache(10)
 	wg := &sync.WaitGroup{}
@@ -76,4 +77,102 @@ func TestCacheMultithreading(t *testing.T) {
 	}()
 
 	wg.Wait()
+}
+
+func TestCacheDummy(t *testing.T) {
+	t.Run("empty cache", func(t *testing.T) {
+		c := NewCache(2)
+
+		c.Set("aaa", 100)
+		c.Set("bbb", 200)
+		c.Get("aaa")
+		// c.Get("bbb")
+		c.Set("aaa", 300)
+		slog.Debug(c)
+	})
+}
+
+func TestCacheOverflow(t *testing.T) {
+	t.Run("empty cache", func(t *testing.T) {
+		c := NewCache(3)
+
+		c.Set("a", 100)
+		c.Set("b", 200)
+		c.Set("c", 300)
+		c.Set("d", 400)
+		// c.Get("bbb")
+		slog.Debug(c)
+		lruC := c.(*lruCache)
+		slog.Debug(lruC.items)
+
+		keys := make([]string, 0, 3)
+		for k := range lruC.items {
+			keys = append(keys, string(k))
+		}
+		sort.Strings(keys)
+		require.Equal(t, []string{"b", "c", "d"}, keys)
+
+		elems := make([]int, 0, lruC.queue.Len())
+		for i := lruC.queue.Front(); i != nil; i = i.Next {
+			cacheItem := i.Value.(cacheItem)
+			value := cacheItem.value.(int)
+			elems = append(elems, value)
+		}
+		require.Equal(t, []int{400, 300, 200}, elems)
+	})
+}
+
+func TestCacheComplexOverflow(t *testing.T) {
+	t.Run("empty cache", func(t *testing.T) {
+		c := NewCache(3)
+
+		c.Set("a", 100)
+		c.Set("b", 200)
+		c.Set("c", 300)
+		c.Set("a", 200)
+		c.Get("b")
+		c.Get("c")
+		c.Set("d", 400)
+		c.Set("e", 500)
+		slog.Debug(c)
+
+		lruC := c.(*lruCache)
+		slog.Debug(lruC.items)
+
+		keys := make([]string, 0, 3)
+		for k := range lruC.items {
+			keys = append(keys, string(k))
+		}
+		sort.Strings(keys)
+		require.Equal(t, []string{"c", "d", "e"}, keys)
+
+		elems := make([]int, 0, lruC.queue.Len())
+		for i := lruC.queue.Front(); i != nil; i = i.Next {
+			cacheItem := i.Value.(cacheItem)
+			value := cacheItem.value.(int)
+			elems = append(elems, value)
+		}
+		require.Equal(t, []int{500, 400, 300}, elems)
+	})
+}
+
+func TestClear(t *testing.T) {
+	t.Run("empty cache", func(t *testing.T) {
+		c := NewCache(2)
+
+		c.Set("a", 100)
+		c.Set("b", 200)
+		c.Clear()
+		slog.Debug(c)
+
+		lruC := c.(*lruCache)
+
+		require.Equal(t, 0, lruC.queue.Len())
+
+		// Проверяем что после очистки всё дальше работает
+		c.Set("a", 100)
+		c.Set("b", 200)
+		slog.Debug(lruC)
+		require.Equal(t, 2, lruC.queue.Len())
+	})
 }

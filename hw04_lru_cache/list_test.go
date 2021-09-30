@@ -1,6 +1,7 @@
 package hw04lrucache
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -22,7 +23,6 @@ func TestList(t *testing.T) {
 		l.PushBack(20)  // [10, 20]
 		l.PushBack(30)  // [10, 20, 30]
 		require.Equal(t, 3, l.Len())
-
 		middle := l.Front().Next // 20
 		l.Remove(middle)         // [10, 30]
 		require.Equal(t, 2, l.Len())
@@ -47,5 +47,129 @@ func TestList(t *testing.T) {
 			elems = append(elems, i.Value.(int))
 		}
 		require.Equal(t, []int{70, 80, 60, 40, 10, 30, 50}, elems)
+	})
+}
+
+func TestListManyCases(t *testing.T) {
+	// на самом деле это не нужно, осталось от эксперементов
+	// оставлю тут на память
+	lpb := List.PushBack
+	lpf := List.PushFront
+	lr := List.Remove
+
+	type action struct {
+		name   string
+		run    func(l List)
+		result []int
+	}
+
+	actions := []action{
+		{
+			name: "push back and front",
+			run: func(l List) {
+				lpb(l, 10)
+				lpf(l, 5)
+				lpb(l, 20)
+				lpf(l, 1)
+			},
+			result: []int{1, 5, 10, 20},
+		},
+		{
+			name: "remove last item",
+			run: func(l List) {
+				lpf(l, 10)
+				lpf(l, 20)
+				i := lpf(l, 20)
+				lr(l, i)
+			},
+			result: []int{20, 10},
+		},
+		{
+			name: "remove midle item",
+			run: func(l List) {
+				lpf(l, 10)
+				i := lpf(l, 20)
+				lpf(l, 30)
+				lr(l, i)
+			},
+			result: []int{30, 10},
+		},
+		{
+			name: "remove first item",
+			run: func(l List) {
+				i := lpf(l, 10)
+				lpf(l, 20)
+				lpf(l, 30)
+				lr(l, i)
+			},
+			result: []int{30, 20},
+		},
+		{
+			name: "move to front single item",
+			run: func(l List) {
+				l.PushFront(10)
+				l.MoveToFront(l.Front())
+			},
+			result: []int{10},
+		},
+		{
+			name: "remove single item",
+			run: func(l List) {
+				i := l.PushFront(10)
+				l.Remove(i)
+				require.Equal(t, 0, l.Len())
+				require.Nil(t, l.Front())
+				require.Nil(t, l.Back())
+			},
+			result: []int{},
+		},
+	}
+
+	for i, a := range actions {
+		l := NewList()
+		t.Run(fmt.Sprintf("test_%d, name:%s", i, a.name), func(t *testing.T) {
+			a.run(l)
+			slog.Debug(l)
+			elems := make([]int, 0, l.Len())
+			for i := l.Front(); i != nil; i = i.Next {
+				elems = append(elems, i.Value.(int))
+			}
+			require.Equal(t, a.result, elems)
+		})
+	}
+}
+
+func TestString(t *testing.T) {
+	t.Run("String", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+		l.PushFront(20)
+		l.PushFront(30)
+		l.PushBack(100)
+		l.PushBack(110)
+		l.PushFront(5)
+		l.MoveToFront(l.Front())
+
+		slog.Debug(l)
+		str := fmt.Sprintf("%v", l)
+		require.Equal(t, "{5 30 20 10 100 110 }", str)
+	})
+}
+
+func TestDummyGoString(t *testing.T) {
+	t.Run("String", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+		l.PushFront(20)
+		l.PushFront(30)
+		l.PushBack(100)
+		l.PushBack(110)
+		l.PushFront(5)
+		l.MoveToFront(l.Front())
+
+		str := fmt.Sprintf("%#v", l)
+		slog.Debug(str)
 	})
 }
