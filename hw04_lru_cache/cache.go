@@ -6,8 +6,6 @@ import (
 	"sync"
 )
 
-var mutex = &sync.Mutex{}
-
 type Key string
 
 type Cache interface {
@@ -26,11 +24,12 @@ type lruCache struct {
 	capacity int
 	queue    List
 	items    map[Key]*ListItem
+	mutex    *sync.Mutex
 }
 
 func (l *lruCache) Set(key Key, value interface{}) bool {
-	mutex.Lock()
-	defer mutex.Unlock()
+	l.mutex.Lock()
+	defer l.mutex.Unlock()
 
 	// slog.Debug("Set: ", key, " : ", value)
 	if item, ok := l.items[key]; ok {
@@ -59,8 +58,8 @@ func (l *lruCache) Set(key Key, value interface{}) bool {
 }
 
 func (l *lruCache) Get(key Key) (interface{}, bool) {
-	mutex.Lock()
-	defer mutex.Unlock()
+	l.mutex.Lock()
+	defer l.mutex.Unlock()
 	if item, ok := l.items[key]; ok {
 		currentCacheItem := item.Value.(cacheItem)
 		l.queue.MoveToFront(item)
@@ -71,8 +70,8 @@ func (l *lruCache) Get(key Key) (interface{}, bool) {
 }
 
 func (l *lruCache) Clear() {
-	mutex.Lock()
-	defer mutex.Unlock()
+	l.mutex.Lock()
+	defer l.mutex.Unlock()
 	l.queue = NewList()
 	l.items = make(map[Key]*ListItem, l.capacity)
 }
@@ -94,5 +93,6 @@ func NewCache(capacity int) Cache {
 		capacity: capacity,
 		queue:    NewList(),
 		items:    make(map[Key]*ListItem, capacity),
+		mutex:    &sync.Mutex{},
 	}
 }
