@@ -2,35 +2,51 @@ package hw05parallelexecution
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"sync/atomic"
+
+	logger "github.com/f4rx/logger-zap-wrapper"
+	"go.uber.org/zap"
 )
 
-var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
+var slog *zap.SugaredLogger //nolint:gochecknoglobals
+
+func init() {
+	slog = logger.NewSugaredLogger()
+}
+
+var (
+	ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
+	ErrWorkersNotFound     = errors.New("нет свободных воркеров")
+)
 
 type Task func() error
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
-func Run(tasks []Task, n, m int) error {
+func Run(tasks []Task, workersCount, maxErrorsCount int) error {
 	// Place your code here.
 
-	// maxGoroutines := make(chan struct{}, n)
+	if workersCount <= 0 {
+		return ErrWorkersNotFound
+	}
 
 	var wg sync.WaitGroup
 	var errorCount int64 = 0
 	var lastTaskPosition int64 = -1
+	tasksLen := int64(len(tasks))
 
-	wg.Add(n)
-	for i := 0; i < n; i++ {
+	wg.Add(workersCount)
+	for i := 0; i < workersCount; i++ {
 		go func(tasks []Task, errorCount, lastTaskPosition *int64, maxErrorsCount, runnerID int) {
 			defer wg.Done()
 			for {
 				taskPosition := atomic.AddInt64(lastTaskPosition, 1)
-				// fmt.Printf("Runner %d, task %d\n", runnerID, taskPosition)
-				if taskPosition >= int64(len(tasks)) {
+				slog.Debug(fmt.Sprintf("Runner %d, task %d\n", runnerID, taskPosition))
+				if taskPosition >= tasksLen {
 					return
 				}
-				if atomic.LoadInt64(errorCount) >= int64(maxErrorsCount) {
+				if maxErrorsCount > 0 && atomic.LoadInt64(errorCount) >= int64(maxErrorsCount) {
 					return
 				}
 				err := tasks[taskPosition]()
@@ -38,26 +54,11 @@ func Run(tasks []Task, n, m int) error {
 					atomic.AddInt64(errorCount, 1)
 				}
 			}
-		}(tasks, &errorCount, &lastTaskPosition, m, i)
+		}(tasks, &errorCount, &lastTaskPosition, maxErrorsCount, i)
 	}
 
-	// for _, task := range tasks {
-	// 	wg.Add(1)
-	// 	go func(task Task, errorCount *int64, m int) {
-	// 		defer wg.Done()
-	// 		maxGoroutines <- struct{}{}
-	// 		if int64(m) > atomic.LoadInt64(errorCount) {
-	// 			err := task()
-	// 			if err != nil {
-	// 				atomic.AddInt64(errorCount, 1)
-	// 			}
-	// 		}
-	// 		<-maxGoroutines
-	// 	}(task, &errorCount, m)
-	// }
-
 	wg.Wait()
-	if errorCount >= int64(m) {
+	if maxErrorsCount > 0 && errorCount >= int64(maxErrorsCount) {
 		return ErrErrorsLimitExceeded
 	}
 	return nil
