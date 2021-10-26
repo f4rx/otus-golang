@@ -2,7 +2,6 @@ package hw05parallelexecution
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"sync/atomic"
 
@@ -42,7 +41,7 @@ func Run(tasks []Task, workersCount, maxErrorsCount int) error {
 			defer wg.Done()
 			for {
 				taskPosition := atomic.AddInt64(lastTaskPosition, 1)
-				slog.Debug(fmt.Sprintf("Runner %d, task %d\n", runnerID, taskPosition))
+				slog.Debugf("Runner %d, task %d\n", runnerID, taskPosition)
 				if taskPosition >= tasksLen {
 					return
 				}
