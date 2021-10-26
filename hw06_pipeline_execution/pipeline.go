@@ -72,7 +72,12 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 
 		for j := 0; j <= i; j++ {
 			v := <-values[j]
-			out <- v
+			select {
+			case <- done:
+				return
+			default:
+				out <- v
+			}
 		}
 
 		close(out)
