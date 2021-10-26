@@ -12,7 +12,7 @@ import (
 	"go.uber.org/goleak"
 )
 
-func TestRun(t *testing.T) {
+func TestRun2(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
 	t.Run("if were errors in first M tasks, than finished not more N+M tasks", func(t *testing.T) {
@@ -32,7 +32,7 @@ func TestRun(t *testing.T) {
 
 		workersCount := 10
 		maxErrorsCount := 23
-		err := Run(tasks, workersCount, maxErrorsCount)
+		err := Run2(tasks, workersCount, maxErrorsCount)
 
 		require.Truef(t, errors.Is(err, ErrErrorsLimitExceeded), "actual err - %v", err)
 		require.LessOrEqual(t, runTasksCount, int32(workersCount+maxErrorsCount), "extra tasks were started")
@@ -60,7 +60,7 @@ func TestRun(t *testing.T) {
 		maxErrorsCount := 1
 
 		start := time.Now()
-		err := Run(tasks, workersCount, maxErrorsCount)
+		err := Run2(tasks, workersCount, maxErrorsCount)
 		elapsedTime := time.Since(start)
 		require.NoError(t, err)
 
@@ -69,7 +69,7 @@ func TestRun(t *testing.T) {
 	})
 }
 
-func TestRun1(t *testing.T) {
+func TestRun21(t *testing.T) {
 	// Тест используется для разовой отладки
 
 	defer goleak.VerifyNone(t)
@@ -91,14 +91,14 @@ func TestRun1(t *testing.T) {
 
 		workersCount := 10
 		maxErrorsCount := 23
-		err := Run(tasks, workersCount, maxErrorsCount)
+		err := Run2(tasks, workersCount, maxErrorsCount)
 
 		require.Truef(t, errors.Is(err, ErrErrorsLimitExceeded), "actual err - %v", err)
 		require.LessOrEqual(t, runTasksCount, int32(workersCount+maxErrorsCount), "extra tasks were started")
 	})
 }
 
-func TestRunZeroWorkers(t *testing.T) {
+func TestRun2ZeroWorkers(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
 	t.Run("Проверка на n=0, 0-воркеров", func(t *testing.T) {
@@ -118,14 +118,14 @@ func TestRunZeroWorkers(t *testing.T) {
 
 		workersCount := 0
 		maxErrorsCount := 8128
-		err := Run(tasks, workersCount, maxErrorsCount)
+		err := Run2(tasks, workersCount, maxErrorsCount)
 
 		require.Truef(t, errors.Is(err, ErrWorkersNotFound), "actual err - %v", err)
 		require.LessOrEqual(t, runTasksCount, int32(workersCount+maxErrorsCount), "extra tasks were started")
 	})
 }
 
-func TestRunZeroErrors(t *testing.T) {
+func TestRun2ZeroErrors(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
 	t.Run("Проверка на m=0, 0-ошибок, задачи с ошибками", func(t *testing.T) {
@@ -145,14 +145,14 @@ func TestRunZeroErrors(t *testing.T) {
 
 		workersCount := 4
 		maxErrorsCount := 0
-		err := Run(tasks, workersCount, maxErrorsCount)
+		err := Run2(tasks, workersCount, maxErrorsCount)
 
 		require.NoError(t, err)
 		require.LessOrEqual(t, runTasksCount, int32(tasksCount), "extra tasks were started")
 	})
 }
 
-func TestRunZeroErrors2(t *testing.T) {
+func TestRun2ZeroErrors2(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
 	t.Run("Проверка на m=0, 0-ошибок, задачи без ошибок", func(t *testing.T) {
@@ -171,7 +171,7 @@ func TestRunZeroErrors2(t *testing.T) {
 
 		workersCount := 4
 		maxErrorsCount := 0
-		err := Run(tasks, workersCount, maxErrorsCount)
+		err := Run2(tasks, workersCount, maxErrorsCount)
 
 		require.NoError(t, err)
 		require.LessOrEqual(t, runTasksCount, int32(tasksCount), "extra tasks were started")
