@@ -1,9 +1,17 @@
 package hw06pipelineexecution
 
 import (
-
 	"sync"
+
+	logger "github.com/f4rx/logger-zap-wrapper"
+	"go.uber.org/zap"
 )
+
+var slog *zap.SugaredLogger //nolint:gochecknoglobals
+
+func init() {
+	slog = logger.NewSugaredLogger()
+}
 
 var mutex = &sync.Mutex{}
 
@@ -31,7 +39,6 @@ func execStages(data interface{}, stages ...Stage) Out {
 			out <- data
 		}
 
-
 		close(out)
 	}()
 	return out
@@ -41,12 +48,18 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	out := make(Bi)
 
 	go func() {
+		<-done
+		close(out)
+	}()
+
+	go func() {
 		values := make(map[int]Out)
 		var wg sync.WaitGroup
 		i := -1
 		for data := range in {
 			wg.Add(1)
 			i++
+			slog.Debug("Data: ", data)
 			go func(values map[int]Out, index int, data interface{}, stages ...Stage) {
 				defer wg.Done()
 				value := execStages(data, stages...)

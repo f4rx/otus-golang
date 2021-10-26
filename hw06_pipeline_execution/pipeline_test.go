@@ -39,7 +39,6 @@ func TestPipeline(t *testing.T) {
 
 	emptyStages := []Stage{}
 
-
 	t.Run("empty stages", func(t *testing.T) {
 		in := make(Bi)
 		data := []int{1, 2, 3, 4, 5}
@@ -50,7 +49,6 @@ func TestPipeline(t *testing.T) {
 			}
 			close(in)
 		}()
-
 
 		result := make([]interface{}, 0, 10)
 		for s := range ExecutePipeline(in, nil, emptyStages...) {
@@ -98,7 +96,8 @@ func TestPipeline(t *testing.T) {
 		data := []int{1, 2, 3, 4, 5}
 
 		// Abort after 200ms
-		abortDur := sleepPerStage * 2
+		// abortDur := sleepPerStage * 2
+		abortDur := time.Millisecond
 		go func() {
 			<-time.After(abortDur)
 			close(done)
