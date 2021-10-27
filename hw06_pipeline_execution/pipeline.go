@@ -21,25 +21,18 @@ type (
 
 type Stage func(in In) (out Out)
 
-func execStages(data interface{}, stages ...Stage) Out {
-	out := make(Bi)
-
-	go func() {
-		fIn := make(Bi)
-		if len(stages) > 0 {
-			fOut := stages[0](fIn)
-			for i := 1; i < len(stages); i++ {
-				fOut = stages[i](fOut)
-			}
-			fIn <- data
-			out <- <-fOut
-		} else {
-			out <- data
+func execStages(data interface{}, stages ...Stage) interface{} {
+	fIn := make(Bi)
+	defer close(fIn)
+	var fOut Out = fIn
+	if len(stages) > 0 {
+		for _, stage := range stages {
+			fOut = stage(fOut)
 		}
-
-		close(out)
-	}()
-	return out
+		fIn <- data
+		return <-fOut
+	}
+	return data
 }
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
@@ -74,7 +67,7 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 				defer wg.Done()
 				value := execStages(data, stages...)
 				mapMutex.Lock()
-				values[index] = <-value
+				values[index] = value
 				mapMutex.Unlock()
 			}(values, i, data, stages...)
 		}
