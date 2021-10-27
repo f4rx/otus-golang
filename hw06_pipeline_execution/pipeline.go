@@ -35,7 +35,6 @@ func execStages(data interface{}, stages ...Stage) interface{} {
 	}
 	fIn <- data
 	return <-fOut
-
 }
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
