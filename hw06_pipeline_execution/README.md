@@ -36,6 +36,3 @@ func Stage(in <-chan interface{}) (out <-chan interface{}) {
 ### Подсказки
 - https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 - `go test -v -race -count=100 .`
-
-
-
