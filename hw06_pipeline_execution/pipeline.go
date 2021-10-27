@@ -25,14 +25,17 @@ func execStages(data interface{}, stages ...Stage) interface{} {
 	fIn := make(Bi)
 	defer close(fIn)
 	var fOut Out = fIn
-	if len(stages) > 0 {
-		for _, stage := range stages {
-			fOut = stage(fOut)
-		}
-		fIn <- data
-		return <-fOut
+
+	if len(stages) == 0 {
+		return data
 	}
-	return data
+
+	for _, stage := range stages {
+		fOut = stage(fOut)
+	}
+	fIn <- data
+	return <-fOut
+
 }
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
