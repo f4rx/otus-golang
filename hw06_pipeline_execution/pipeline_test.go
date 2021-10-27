@@ -1,7 +1,6 @@
 package hw06pipelineexecution
 
 import (
-	// "fmt"
 	"strconv"
 	"testing"
 	"time"

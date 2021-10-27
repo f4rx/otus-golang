@@ -43,8 +43,8 @@ func execStages(data interface{}, stages ...Stage) Out {
 }
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
-	var mapMutex = &sync.Mutex{}
-	var doneMutex = &sync.Mutex{}
+	mapMutex := &sync.Mutex{}
+	doneMutex := &sync.Mutex{}
 
 	out := make(Bi)
 	closed := false
@@ -63,7 +63,6 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	}()
 
 	go func() {
-		// values := make(map[int]Out)
 		values := make(map[int]interface{})
 		var wg sync.WaitGroup
 		i := -1
@@ -81,10 +80,11 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 		}
 		wg.Wait()
 
+		// Эта часть нужна чтобы оформить вывод в том же порядке в каком принимали данные
 		doneMutex.Lock()
-		slog.Debug("closed: ", closed)
+		slog.Debug("закрытие в онсновном потоке: ", closed)
 		if !closed {
-			slog.Debug("вывод")
+			slog.Debug("формируем вывод")
 
 			for j := 0; j <= i; j++ {
 				v := values[j]
