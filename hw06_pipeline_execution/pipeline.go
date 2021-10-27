@@ -13,8 +13,6 @@ func init() {
 	slog = logger.NewSugaredLogger()
 }
 
-var mutex = &sync.Mutex{}
-
 type (
 	In  = <-chan interface{}
 	Out = In
@@ -45,42 +43,57 @@ func execStages(data interface{}, stages ...Stage) Out {
 }
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
+	var mapMutex = &sync.Mutex{}
+	var doneMutex = &sync.Mutex{}
+
 	out := make(Bi)
+	closed := false
 
 	go func() {
 		<-done
-		close(out)
+		slog.Debug("донон")
+		doneMutex.Lock()
+		slog.Debug("лок донона")
+		if !closed {
+			slog.Debug("закрытие")
+			close(out)
+			closed = true
+		}
+		doneMutex.Unlock()
 	}()
 
 	go func() {
-		values := make(map[int]Out)
+		// values := make(map[int]Out)
+		values := make(map[int]interface{})
 		var wg sync.WaitGroup
 		i := -1
 		for data := range in {
 			wg.Add(1)
 			i++
 			slog.Debug("Data: ", data)
-			go func(values map[int]Out, index int, data interface{}, stages ...Stage) {
+			go func(values map[int]interface{}, index int, data interface{}, stages ...Stage) {
 				defer wg.Done()
 				value := execStages(data, stages...)
-				mutex.Lock()
-				values[index] = value
-				mutex.Unlock()
+				mapMutex.Lock()
+				values[index] = <-value
+				mapMutex.Unlock()
 			}(values, i, data, stages...)
 		}
 		wg.Wait()
 
-		for j := 0; j <= i; j++ {
-			v := <-values[j]
-			select {
-			case <- done:
-				return
-			default:
+		doneMutex.Lock()
+		slog.Debug("closed: ", closed)
+		if !closed {
+			slog.Debug("вывод")
+
+			for j := 0; j <= i; j++ {
+				v := values[j]
 				out <- v
 			}
+			close(out)
+			closed = true
 		}
-
-		close(out)
+		doneMutex.Unlock()
 	}()
 	return out
 }

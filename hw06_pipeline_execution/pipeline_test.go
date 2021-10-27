@@ -1,7 +1,7 @@
 package hw06pipelineexecution
 
 import (
-	"fmt"
+	// "fmt"
 	"strconv"
 	"testing"
 	"time"
@@ -80,7 +80,7 @@ func TestPipeline(t *testing.T) {
 		for s := range ExecutePipeline(in, nil, stages...) {
 			result = append(result, s.(string))
 		}
-		fmt.Println(result)
+		slog.Debug(result)
 		elapsed := time.Since(start)
 
 		require.Equal(t, []string{"102", "104", "106", "108", "110"}, result)
@@ -96,8 +96,8 @@ func TestPipeline(t *testing.T) {
 		data := []int{1, 2, 3, 4, 5}
 
 		// Abort after 200ms
-		// abortDur := sleepPerStage * 2
-		abortDur := time.Millisecond
+		abortDur := sleepPerStage * 2
+		// abortDur := time.Millisecond
 		go func() {
 			<-time.After(abortDur)
 			close(done)
