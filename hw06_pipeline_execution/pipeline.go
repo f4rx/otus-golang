@@ -77,7 +77,7 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 
 		// Эта часть нужна чтобы оформить вывод в том же порядке в каком принимали данные
 		doneMutex.Lock()
-		slog.Debug("закрытие в онсновном потоке: ", closed)
+		slog.Debug("закрытие в основном потоке: ", closed)
 		if !closed {
 			slog.Debug("формируем вывод")
 
